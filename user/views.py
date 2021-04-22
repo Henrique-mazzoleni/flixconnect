@@ -68,4 +68,3 @@ def scrap(request):
     access_mylist()
     scroll_to_end_of_page()
     shows = get_shows()
-git
