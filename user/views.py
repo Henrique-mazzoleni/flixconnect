@@ -4,6 +4,9 @@ from django.shortcuts import render, redirect
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+def home(request):
+    return render(request, 'user/home.html')
+
 def login(driver, url, ACCOUNT, PASSWORD, USER_NAME):
     # login
     driver.get(url)
