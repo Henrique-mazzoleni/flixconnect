@@ -1,6 +1,6 @@
 import os
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
+from .forms import UserForm
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -9,7 +9,7 @@ def home(request):
     return render(request, 'user/home.html')
 
 def signupuser(request):
-    return render(request, 'user/signupuser.html', {'form':UserCreationForm()})
+    return render(request, 'user/signupuser.html', {'form':UserForm()})
 
 def login(driver, url, ACCOUNT, PASSWORD, USER_NAME):
     # login
