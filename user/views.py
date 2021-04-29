@@ -1,6 +1,10 @@
 import os
 from django.shortcuts import render, redirect
+from django.db import IntegrityError
+from django.contrib.auth import login
+
 from .forms import UserForm
+from .models import User
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -9,9 +13,29 @@ def home(request):
     return render(request, 'user/home.html')
 
 def signupuser(request):
-    return render(request, 'user/signupuser.html', {'form':UserForm()})
+    if request.method == 'GET':
+        return render(request, 'user/signupuser.html', {'form':UserForm()})
+    else:
+        try:
+            user = User.objects.create_user(
+                username = request.POST['username'],
+                password = request.POST['password'],
+                netflix_login = request.POST['login'],
+                netflix_username = request.POST['profile'],
+                netflix_password = request.POST['access_pass']
+            )
+            user.save()
+            login(request, user)
+            return redirect('logedin')
 
-def login(driver, url, ACCOUNT, PASSWORD, USER_NAME):
+        except IntegrityError:
+            return render(request, 'user/signupuser.html', {'form': UserForm(), 'error': 'username not allowed'})
+            
+def logedin(request):
+    return render(request, 'user/logedin.html', {'user':request.user})
+
+
+def login_net(driver, url, ACCOUNT, PASSWORD, USER_NAME):
     # login
     driver.get(url)
     driver.find_element_by_xpath('//*[@id="id_userLoginId"]').send_keys(ACCOUNT)
