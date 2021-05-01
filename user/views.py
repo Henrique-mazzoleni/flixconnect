@@ -2,9 +2,8 @@ import os
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
 from django.contrib.auth import login
-
-from .forms import UserForm
-from .models import User
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -14,24 +13,25 @@ def home(request):
 
 def signupuser(request):
     if request.method == 'GET':
-        return render(request, 'user/signupuser.html', {'form':UserForm()})
+        return render(request, 'user/signupuser.html', {'form':UserCreationForm()})
     else:
-        try:
-            user = User.objects.create_user(
-                username = request.POST['username'],
-                password = request.POST['password'],
-                netflix_login = request.POST['login'],
-                netflix_username = request.POST['profile'],
-                netflix_password = request.POST['access_pass']
-            )
-            user.save()
-            login(request, user)
-            return redirect('logedin')
+        if request.POST['password'] == request.POST['confirm_password']:
+            try:
+                user = User.objects.create_user(
+                    request.POST['username'],
+                    password = request.POST['password'],
+                )
+                user.save()
+                login(request, user)
+                return redirect('logedin')
 
-        except IntegrityError:
-            return render(request, 'user/signupuser.html', {'form': UserForm(), 'error': 'username not allowed'})
+            except IntegrityError:
+                return render(request, 'user/signupuser.html', {'form': UserCreationForm(), 'error': 'username not allowed'})
+        else:
+            return render(request, 'user/signupuser.html', {'form': UserCreationForm(), 'error': 'Passwords did not match'})
             
 def logedin(request):
+    print(request.user)
     return render(request, 'user/logedin.html', {'user':request.user})
 
 
