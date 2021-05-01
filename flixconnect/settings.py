@@ -120,3 +120,8 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+NETFLIX_URL = 'https://www.netflix.com/de/login'
+MY_LIST_URL = 'https://www.netflix.com/browse/my-list'
+SCROLL_PAUSE_TIME = 0.5
+LOAD_PAGE_PAUSE_TIME = 1
