@@ -1,8 +1,8 @@
 import os
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
-from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 
 from selenium import webdriver
@@ -26,12 +26,40 @@ def signupuser(request):
                 return redirect('logedin')
 
             except IntegrityError:
-                return render(request, 'user/signupuser.html', {'form': UserCreationForm(), 'error': 'username not allowed'})
+                return render(
+                    request, 
+                    'user/signupuser.html', 
+                    {'form': UserCreationForm(), 'error': 'username not allowed'}
+                )
         else:
-            return render(request, 'user/signupuser.html', {'form': UserCreationForm(), 'error': 'Passwords did not match'})
+            return render(
+                request, 
+                'user/signupuser.html', 
+                {'form': UserCreationForm(), 'error': 'Passwords did not match.'}
+            )
             
+def loginuser(request):
+    if request.method == 'GET':
+        return render(request, 'user/loginuser.html', {'form':AuthenticationForm()})
+    else:
+        user = authenticate(
+            username = request.POST['username'],
+            password = request.POST['password']
+        )
+        if user is None:
+            return render(
+                request,
+                'user/loginuser.html',
+                {
+                    'form': AuthenticationForm(), 
+                    'error': 'Username and Password do not match.'
+                }
+            )
+        else:
+            login(request, user)
+            return render(request, 'user/logedin.html', {'user':request.user})
+
 def logedin(request):
-    print(request.user)
     return render(request, 'user/logedin.html', {'user':request.user})
 
 
@@ -61,10 +89,14 @@ def access_mylist():
 def scroll_to_end_of_page():
     done = False
     while not done:
-        last_element = driver.execute_script('return document.querySelector(".galleryLockups").lastElementChild')
+        last_element = driver.execute_script(
+            'return document.querySelector(".galleryLockups").lastElementChild'
+        )
         driver.find_element_by_tag_name('body').send_keys(Keys.END)
         time.sleep(SCROLL_PAUSE_TIME)
-        if last_element == driver.execute_script('return document.querySelector(".galleryLockups").lastElementChild'):
+        if last_element == driver.execute_script(
+            'return document.querySelector(".galleryLockups").lastElementChild'
+        ):
             done = True
 
 def get_shows():
