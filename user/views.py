@@ -3,11 +3,11 @@ import time
 
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 
-from ..flixconnect import settings  
+from flixconnect import settings  
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -24,11 +24,11 @@ def signupuser(request):
             try:
                 user = User.objects.create_user(
                     request.POST['username'],
-                    password = request.POST['password'],
+                    password=request.POST['password']
                 )
                 user.save()
                 login(request, user)
-                return redirect('logedin')
+                return redirect('myhome')
 
             except IntegrityError:
                 return render(
@@ -48,8 +48,8 @@ def loginuser(request):
         return render(request, 'user/loginuser.html', {'form':AuthenticationForm()})
     else:
         user = authenticate(
-            username = request.POST['username'],
-            password = request.POST['password']
+            username=request.POST['username'],
+            password=request.POST['password']
         )
         if user is None:
             return render(
@@ -57,16 +57,20 @@ def loginuser(request):
                 'user/loginuser.html',
                 {
                     'form': AuthenticationForm(), 
-                    'error': 'Username and Password do not match.'
+                    'error': 'Incorrect Username or Password.'
                 }
             )
         else:
             login(request, user)
-            return render(request, 'user/logedin.html', {'user':request.user})
+            return render(request, 'user/myhome.html', {'user':request.user})
 
-def logedin(request):
-    return render(request, 'user/logedin.html', {'user':request.user})
+def myhome(request):
+    return render(request, 'user/myhome.html', {'user':request.user})
 
+def logoutuser(request):
+    if request.method == 'POST':
+        logout(request)
+        return redirect('home')
 
 def login_net(driver, url, ACCOUNT, PASSWORD, USER_NAME):
     # login
