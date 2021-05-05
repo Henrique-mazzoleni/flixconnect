@@ -1,18 +1,6 @@
 <h2>Sign Up</h2>
 <form method="POST">
-  {% csrf_token %} {% if error %} {{ error }} {% endif %}
-  <div>
-    <label for="username">Username</label>
-    <input type="text" name="username" />
-  </div>
-  <div>
-    <label for="password">Password</label>
-    <input type="password" name="password" />
-  </div>
-  <div>
-    <label for="confirm_password">Confirm Password</label>
-    <input type="password" name="confirm_password" />
-  </div>
+  {% csrf_token %} {{ form.as_p }}
   <input type="submit" value="Sign Up" />
 </form>
 <div>

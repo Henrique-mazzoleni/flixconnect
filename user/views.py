@@ -17,31 +17,17 @@ def home(request):
     return render(request, 'user/home.html')
 
 def signupuser(request):
-    if request.method == 'GET':
-        return render(request, 'user/signupuser.html', {'form':UserCreationForm()})
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid:
+            form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            return redirect('myhome')          
     else:
-        if request.POST['password'] == request.POST['confirm_password']:
-            try:
-                user = User.objects.create_user(
-                    request.POST['username'],
-                    password=request.POST['password']
-                )
-                user.save()
-                login(request, user)
-                return redirect('myhome')
-
-            except IntegrityError:
-                return render(
-                    request, 
-                    'user/signupuser.html', 
-                    {'form': UserCreationForm(), 'error': 'username not allowed'}
-                )
-        else:
-            return render(
-                request, 
-                'user/signupuser.html', 
-                {'form': UserCreationForm(), 'error': 'Passwords did not match.'}
-            )
+        return render(request, 'user/signupuser.html', {'form':UserCreationForm()})
             
 def loginuser(request):
     if request.method == 'GET':
