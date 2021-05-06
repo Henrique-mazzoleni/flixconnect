@@ -20,35 +20,22 @@ def signupuser(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid:
-            form.save()
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=password)
+            user = form.save()
             login(request, user)
-            return redirect('myhome')          
+            return redirect('myhome')
     else:
         return render(request, 'user/signupuser.html', {'form':UserCreationForm()})
             
 def loginuser(request):
-    if request.method == 'GET':
-        return render(request, 'user/loginuser.html', {'form':AuthenticationForm()})
-    else:
-        user = authenticate(
-            username=request.POST['username'],
-            password=request.POST['password']
-        )
-        if user is None:
-            return render(
-                request,
-                'user/loginuser.html',
-                {
-                    'form': AuthenticationForm(), 
-                    'error': 'Incorrect Username or Password.'
-                }
-            )
-        else:
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid:
+            form.clean()
+            user = form.get_user()
             login(request, user)
-            return render(request, 'user/myhome.html', {'user':request.user})
+            return redirect('myhome')
+    else:
+        return render(request, 'user/loginuser.html', {'form':AuthenticationForm()})
 
 def myhome(request):
     return render(request, 'user/myhome.html', {'user':request.user})
