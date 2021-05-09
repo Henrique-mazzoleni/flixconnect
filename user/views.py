@@ -52,8 +52,11 @@ def logoutuser(request):
 @login_required
 def netflix_login(request):
     if request.method == 'POST':
-        form = NetflixUserForm(request.Post)
+        form = NetflixUserForm(request.POST)
         if form.is_valid():
+            instance = form.save(commit=False)
+            instance.user = request.user
+            instance.save()
             return redirect('myhome')
     else:
         form = NetflixUserForm()

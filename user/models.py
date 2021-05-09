@@ -8,6 +8,9 @@ class NetflixUser(models.Model):
     password = models.CharField(max_length=30)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.profile
+
 class Show(models.Model):
     """Show to be shared by the users"""
     title = models.CharField(max_length=255)
