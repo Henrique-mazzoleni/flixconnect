@@ -6,8 +6,10 @@ from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 
-from flixconnect import settings  
+from flixconnect import settings
+from .forms import NetflixUserForm
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -19,7 +21,7 @@ def home(request):
 def signupuser(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-        if form.is_valid:
+        if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('myhome')
@@ -29,7 +31,7 @@ def signupuser(request):
 def loginuser(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
-        if form.is_valid:
+        if form.is_valid():
             form.clean()
             user = form.get_user()
             login(request, user)
@@ -37,13 +39,25 @@ def loginuser(request):
     else:
         return render(request, 'user/loginuser.html', {'form':AuthenticationForm()})
 
+@login_required
 def myhome(request):
     return render(request, 'user/myhome.html', {'user':request.user})
 
+@login_required
 def logoutuser(request):
     if request.method == 'POST':
         logout(request)
         return redirect('home')
+
+@login_required
+def netflix_login(request):
+    if request.method == 'POST':
+        form = NetflixUserForm(request.Post)
+        if form.is_valid():
+            return redirect('myhome')
+    else:
+        form = NetflixUserForm()
+        return render(request, 'user/netflixLogin.html', {'form': form})
 
 def login_net(driver, url, ACCOUNT, PASSWORD, USER_NAME):
     # login

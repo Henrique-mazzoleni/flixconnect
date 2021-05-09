@@ -1,6 +1,7 @@
-from django import forms
+from django.forms import ModelForm
+from .models import NetflixUser
 
-class NetflixUserForm(forms.Form):
-    login = forms.CharField(label='login', max_length=100)
-    password = forms.CharField(label='access_pass', max_length=30)
-    profile = forms.CharField(label='profile', max_length=50)
+class NetflixUserForm(ModelForm):
+    class Meta:
+        model = NetflixUser
+        fields = ['login', 'password', 'profile']
