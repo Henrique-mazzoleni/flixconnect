@@ -25,4 +25,5 @@ urlpatterns = [
     path('logout/', views.logoutuser, name='logoutuser'),
     path('netflixLogin/', views.netflix_login, name='netflixLogin'),
     path('myhome/', views.myhome, name='myhome'),
+    path('getshows/', views.scrape, name='getShows'),
 ]

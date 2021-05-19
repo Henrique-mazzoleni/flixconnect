@@ -3,6 +3,9 @@
 <p>Login into your Netflix account</p>
 <a href="{% url 'netflixLogin' %}">Login Form</a>
 
+<p>Get Your List</p>
+<a href="{% url 'getShows' %}">Get Shows</a>
+
 <form method="POST" action="{% url 'logoutuser' %}">
   {% csrf_token %}
   <button type="submit">Logout</button>

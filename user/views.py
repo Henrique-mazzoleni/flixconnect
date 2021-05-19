@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 
 from flixconnect import settings
 from .forms import NetflixUserForm
+from .models import NetflixUser, Show
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -62,7 +63,31 @@ def netflix_login(request):
         form = NetflixUserForm()
         return render(request, 'user/netflixLogin.html', {'form': form})
 
-def login_net(driver, url, ACCOUNT, PASSWORD, USER_NAME):
+def scrape(request):
+    
+    options = webdriver.ChromeOptions()
+    # options.headless = True
+    options.add_argument('--deny-permission-prompts')
+    driver = webdriver.Chrome(options=options)
+
+    net_data = NetflixUser.objects.get(user=request.user)
+    
+    enter_netflix(
+        driver,
+        settings.NETFLIX_URL,
+        net_data.login,
+        net_data.password,
+        net_data.profile
+    )
+
+    access_mylist(driver)
+    scroll_to_end_of_page(driver)
+    shows = get_shows(driver)
+
+    for show in shows:
+        print(show)
+
+def enter_netflix(driver, url, ACCOUNT, PASSWORD, USER_NAME):
     # login
     driver.get(url)
     driver.find_element_by_xpath('//*[@id="id_userLoginId"]').send_keys(ACCOUNT)
@@ -79,7 +104,9 @@ def login_net(driver, url, ACCOUNT, PASSWORD, USER_NAME):
 def access_mylist(driver):
     #Go to My List
     nav_items = driver.find_elements_by_class_name('navigation-tab')
+    print(nav_items)
     for item in nav_items:
+        print(item.find_element_by_tag_name('a').get_attribute('href'))
         if item.find_element_by_tag_name('a').get_attribute('href') == settings.MY_LIST_URL:
             item.click()
     time.sleep(settings.LOAD_PAGE_PAUSE_TIME)
@@ -110,22 +137,3 @@ def get_shows(driver):
             }
         )
     return shows_list
-
-def scrap(request):
-    
-    options = webdriver.ChromeOptions()
-    options.headless = True
-    options.add_argument('--deny-permission-prompts')
-    driver = webdriver.Chrome(options=options)
-
-    login_net(
-        driver,
-        settings.NETFLIX_URL,
-        request.user.netflix_login,
-        request.user.netflix_password,
-        request.user.netflix_username
-    )
-
-    access_mylist(driver)
-    scroll_to_end_of_page(driver)
-    shows = get_shows(driver)
