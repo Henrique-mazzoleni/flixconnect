@@ -17,9 +17,13 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
 def home(request):
+    if request.user.is_authenticated:
+        return redirect('myhome')
     return render(request, 'user/home.html')
 
 def signupuser(request):
+    if request.user.is_authenticated:
+        return redirect('myhome')
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -30,6 +34,8 @@ def signupuser(request):
         return render(request, 'user/signupuser.html', {'form':UserCreationForm()})
             
 def loginuser(request):
+    if request.user.is_authenticated:
+        return redirect('myhome')
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
@@ -42,7 +48,11 @@ def loginuser(request):
 
 @login_required
 def myhome(request):
-    return render(request, 'user/myhome.html', {'user':request.user})
+    shows = Show.objects.filter(user=request.user)
+    return render(request, 'user/myhome.html', {
+        'user':request.user,
+        'shows':shows
+    })
 
 @login_required
 def logoutuser(request):
@@ -85,7 +95,10 @@ def scrape(request):
     shows = get_shows(driver)
 
     for show in shows:
-        print(show)
+        s = Show(title=show['label'], link=show['link'], user=request.user)
+        s.save()
+    
+    return redirect('myhome')
 
 def enter_netflix(driver, url, ACCOUNT, PASSWORD, USER_NAME):
     # login
@@ -104,9 +117,7 @@ def enter_netflix(driver, url, ACCOUNT, PASSWORD, USER_NAME):
 def access_mylist(driver):
     #Go to My List
     nav_items = driver.find_elements_by_class_name('navigation-tab')
-    print(nav_items)
     for item in nav_items:
-        print(item.find_element_by_tag_name('a').get_attribute('href'))
         if item.find_element_by_tag_name('a').get_attribute('href') == settings.MY_LIST_URL:
             item.click()
     time.sleep(settings.LOAD_PAGE_PAUSE_TIME)
